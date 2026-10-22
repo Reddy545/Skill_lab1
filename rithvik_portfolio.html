@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="en" class="dark scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rithvik | Computer Science & Engineering Undergraduate @ RVCE</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        slate: {
+                            950: '#080a0f',
+                            900: '#0f172a',
+                            850: '#131c31',
+                            800: '#1e293b'
+                        },
+                        brand: {
+                            teal: '#06b6d4',
+                            cyan: '#22d3ee',
+                            amber: '#f59e0b',
+                            blue: '#3b82f6',
+                            emerald: '#10b981'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'Fira Code', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Three.js & Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        body {
+            background-color: #080a0f;
+            color: #f8fafc;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Glassmorphism Styles */
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
+        }
+
+        .glass-panel-hover {
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .glass-panel-hover:hover {
+            border-color: rgba(6, 182, 212, 0.4);
+            box-shadow: 0 20px 40px -10px rgba(6, 182, 212, 0.15);
+            transform: translateY(-3px);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #080a0f;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #06b6d4;
+        }
+
+        /* Subtle Glow Utility */
+        .text-glow {
+            text-shadow: 0 0 20px rgba(6, 182, 212, 0.4);
+        }
+        .text-glow-amber {
+            text-shadow: 0 0 20px rgba(245, 158, 11, 0.4);
+        }
+
+        /* Active Nav Link */
+        .nav-link.active {
+            color: #22d3ee;
+            border-bottom: 2px solid #06b6d4;
+        }
+
+        /* Perspective Tilt Container */
+        .tilt-container {
+            transform-style: preserve-3d;
+            perspective: 1000px;
+        }
+    </style>
+</head>
+<body class="selection:bg-brand-teal selection:text-slate-950">
+
+    <!-- Interactive 3D Canvas Background -->
+    <div id="canvas-container" class="fixed inset-0 z-0 pointer-events-none opacity-80"></div>
+
+    <!-- Navigation Dock -->
+    <header class="fixed top-0 left-0 w-full z-40 px-4 md:px-8 py-4 transition-all duration-300">
+        <nav class="max-w-7xl mx-auto glass-panel rounded-2xl px-6 py-3.5 flex items-center justify-between border-slate-800/80">
+            <!-- Brand Mark -->
+            <a href="#hero" class="flex items-center gap-3 group">
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-teal to-blue-600 flex items-center justify-center font-mono font-bold text-slate-950 shadow-md group-hover:scale-105 transition-transform">
+                    R
+                </div>
+                <div class="flex flex-col">
+                    <span class="font-mono font-bold text-xs tracking-wider text-slate-100 flex items-center gap-2">
+                        RITHVIK <span class="text-[10px] px-2 py-0.5 rounded bg-brand-teal/10 text-brand-teal border border-brand-teal/20 font-mono">RVCE CSE</span>
+                    </span>
+                    <span class="text-[10px] text-slate-400 font-mono">BENGALURU, INDIA</span>
+                </div>
+            </a>
+
+            <!-- Desk Links -->
+            <div class="hidden md:flex items-center gap-7 font-mono text-xs tracking-wider">
+                <a href="#about" class="nav-link text-slate-300 hover:text-brand-cyan transition-colors py-1">ABOUT</a>
+                <a href="#projects" class="nav-link text-slate-300 hover:text-brand-cyan transition-colors py-1">PROJECTS</a>
+                <a href="#skills" class="nav-link text-slate-300 hover:text-brand-cyan transition-colors py-1">SKILLS</a>
+                <a href="#education" class="nav-link text-slate-300 hover:text-brand-cyan transition-colors py-1">ACADEMICS</a>
+                <a href="#contact" class="nav-link text-slate-300 hover:text-brand-cyan transition-colors py-1">CONTACT</a>
+            </div>
+
+            <!-- Action Tools -->
+            <div class="flex items-center gap-3">
+                <button id="audio-toggle" class="p-2 rounded-xl glass-panel text-slate-400 hover:text-brand-cyan hover:border-brand-teal/40 transition-all text-xs flex items-center gap-2" title="Toggle UI SFX">
+                    <i data-lucide="volume-2" class="w-4 h-4 text-brand-teal" id="audio-icon"></i>
+                    <span class="hidden sm:inline font-mono text-[10px] text-slate-300" id="audio-text">SFX ON</span>
+                </button>
+                <a href="#contact" class="px-4 py-2 rounded-xl bg-brand-teal/10 hover:bg-brand-teal/20 text-brand-cyan border border-brand-teal/30 font-mono text-xs font-semibold transition-all shadow-sm">
+                    GET IN TOUCH
+                </a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content Layout -->
+    <main class="relative z-10">
+
+        <!-- 1. HERO SECTION -->
+        <section id="hero" class="min-h-screen flex items-center justify-center pt-28 pb-16 px-4 md:px-8 max-w-7xl mx-auto">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center w-full">
+                
+                <!-- Hero Core Copy -->
+                <div class="lg:col-span-7 space-y-6">
+                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full glass-panel border border-brand-teal/30 text-brand-cyan text-xs font-mono">
+                        <span class="w-2 h-2 rounded-full bg-brand-teal animate-pulse"></span>
+                        Computer Science Engineering @ RVCE Bengaluru
+                    </div>
+
+                    <h1 class="text-4xl sm:text-6xl font-extrabold tracking-tight text-white leading-[1.1]">
+                        Rithvik
+                        <span class="text-2xl sm:text-4xl text-slate-300 font-semibold mt-2 block">
+                            Systems Programming & Embedded Security
+                        </span>
+                    </h1>
+
+                    <p class="text-slate-400 text-base md:text-lg max-w-2xl leading-relaxed">
+                        3rd Semester CSE undergraduate at <strong class="text-slate-200">RV College of Engineering (RVCE)</strong>. Specializing in low-level C/C++ architecture, hardware PUF primitives, autonomous embedded systems, and analytical software design.
+                    </p>
+
+                    <!-- CTAs -->
+                    <div class="flex flex-wrap items-center gap-4 pt-2">
+                        <a href="#projects" class="px-6 py-3 rounded-xl bg-slate-100 text-slate-950 hover:bg-brand-teal font-semibold text-xs tracking-wider uppercase transition-all shadow-lg flex items-center gap-2">
+                            <i data-lucide="layers" class="w-4 h-4"></i> View Engineering Projects
+                        </a>
+                        <a href="#contact" class="px-6 py-3 rounded-xl glass-panel text-slate-200 hover:text-brand-cyan hover:border-brand-teal/40 font-mono text-xs font-semibold transition-all flex items-center gap-2">
+                            <i data-lucide="mail" class="w-4 h-4 text-brand-teal"></i> Direct Inquiry
+                        </a>
+                    </div>
+
+                    <!-- Highlight Metrics Bar -->
+                    <div class="pt-8 border-t border-slate-800/80 grid grid-cols-3 gap-4 font-mono">
+                        <div>
+                            <span class="text-xs text-slate-500 uppercase block mb-1">INSTITUTION</span>
+                            <span class="text-sm font-semibold text-slate-200">RVCE Bengaluru</span>
+                        </div>
+                        <div>
+                            <span class="text-xs text-slate-500 uppercase block mb-1">PROGRAM</span>
+                            <span class="text-sm font-semibold text-brand-cyan">3rd Sem B.E. CSE</span>
+                        </div>
+                        <div>
+                            <span class="text-xs text-slate-500 uppercase block mb-1">CORE FOCUS</span>
+                            <span class="text-sm font-semibold text-brand-amber">Systems & IoT Security</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Executive Card Widget -->
+                <div class="lg:col-span-5">
+                    <div class="glass-panel glass-panel-hover rounded-3xl p-6 sm:p-8 space-y-6 border-slate-800 relative overflow-hidden">
+                        
+                        <div class="flex items-center justify-between border-b border-slate-800/80 pb-5">
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 rounded-2xl bg-slate-900 border border-slate-700 flex items-center justify-center font-mono font-bold text-brand-cyan text-lg">
+                                    RV
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-base text-white">Rithvik</h3>
+                                    <p class="text-xs text-slate-400 font-mono">CSE Undergraduate • RVCE</p>
+                                </div>
+                            </div>
+                            <span class="text-[10px] font-mono px-2.5 py-1 rounded bg-slate-900 text-brand-teal border border-slate-800">CLASS OF 2029</span>
+                        </div>
+
+                        <!-- Competency Indicators -->
+                        <div class="space-y-3 font-mono text-xs">
+                            <div>
+                                <div class="flex justify-between text-slate-300 mb-1">
+                                    <span>C / C++ & Data Structures</span>
+                                    <span class="text-brand-cyan">Advanced</span>
+                                </div>
+                                <div class="w-full h-1.5 bg-slate-900 rounded-full overflow-hidden">
+                                    <div class="h-full bg-brand-teal rounded-full w-[90%]"></div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <div class="flex justify-between text-slate-300 mb-1">
+                                    <span>Hardware Security & SRAM PUF</span>
+                                    <span class="text-brand-amber">Specialized</span>
+                                </div>
+                                <div class="w-full h-1.5 bg-slate-900 rounded-full overflow-hidden">
+                                    <div class="h-full bg-brand-amber rounded-full w-[88%]"></div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <div class="flex justify-between text-slate-300 mb-1">
+                                    <span>ESP32 & Embedded Systems</span>
+                                    <span class="text-brand-cyan">Proficient</span>
+                                </div>
+                                <div class="w-full h-1.5 bg-slate-900 rounded-full overflow-hidden">
+                                    <div class="h-full bg-brand-blue rounded-full w-[85%]"></div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <div class="flex justify-between text-slate-300 mb-1">
+                                    <span>Python Analytics & Tkinter</span>
+                                    <span class="text-slate-300">Proficient</span>
+                                </div>
+                                <div class="w-full h-1.5 bg-slate-900 rounded-full overflow-hidden">
+                                    <div class="h-full bg-slate-500 rounded-full w-[82%]"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- System Status Terminal -->
+                        <div class="p-4 rounded-xl bg-slate-950 border border-slate-800/80 font-mono text-[11px] space-y-2 text-slate-400">
+                            <div class="flex justify-between items-center text-slate-200 border-b border-slate-900 pb-2">
+                                <span class="flex items-center gap-2">
+                                    <i data-lucide="terminal" class="w-3.5 h-3.5 text-brand-teal"></i> ACADEMIC STATUS
+                                </span>
+                                <span class="text-emerald-400 text-[10px]">VERIFIED</span>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2 text-[10px] pt-1">
+                                <div><span class="text-slate-500">Dept:</span> Computer Science</div>
+                                <div><span class="text-slate-500">Semester:</span> 3rd Semester</div>
+                                <div><span class="text-slate-500">Campus:</span> BLR</div>
+                                <div><span class="text-slate-500">Primary Language:</span> C++ && Python</div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- 2. ABOUT & EXECUTIVE SUMMARY SECTION -->
+        <section id="about" class="py-20 px-4 md:px-8 max-w-7xl mx-auto">
+            <div class="glass-panel rounded-3xl p-8 sm:p-12 border-slate-800/80">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                    <div class="lg:col-span-8 space-y-4">
+                        <!--<span class="text-brand-teal font-mono text-xs uppercase tracking-widest block">// EXECUTIVE SUMMARY</span>-->
+                        <h2 class="text-3xl font-bold text-white">Engineering Engineering Philosophy</h2>
+                        <p class="text-slate-300 text-sm leading-relaxed">
+                            I am a Computer Science & Engineering undergraduate at <strong>Rashtreeya Vidyalaya College of Engineering (RVCE), Bengaluru</strong>. My academic and practical work focuses on building reliable low-level software, exploring physical hardware security primitives, and engineering autonomous embedded systems.
+                        </p>
+                        <p class="text-slate-400 text-sm leading-relaxed">
+                            Through hands-on projects—ranging from SRAM PUF hardware fingerprinting for zero-touch IoT provisioning to ESP32 PID motor control and Python analytics engines—I strive to unite theoretical algorithm design with high-performance silicon execution.
+                        </p>
+                    </div>
+
+                    <div class="lg:col-span-4 grid grid-cols-2 gap-4 font-mono">
+                        <div class="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 text-center">
+                            <span class="text-3xl font-extrabold text-brand-teal block">3rd</span>
+                            <span class="text-[10px] text-slate-400 uppercase tracking-wider">Semester CSE</span>
+                        </div>
+                        <div class="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 text-center">
+                            <span class="text-3xl font-extrabold text-brand-amber block">RVCE</span>
+                            <span class="text-[10px] text-slate-400 uppercase tracking-wider">Bengaluru</span>
+                        </div>
+                        <div class="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 text-center">
+                            <span class="text-3xl font-extrabold text-brand-blue block">4</span>
+                            <span class="text-[10px] text-slate-400 uppercase tracking-wider">Projects</span>
+                        </div>
+                        <div class="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 text-center">
+                            <span class="text-3xl font-extrabold text-emerald-400 block">C++</span>
+                            <span class="text-[10px] text-slate-400 uppercase tracking-wider">Low-Level</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. FEATURED PROJECTS SHOWCASE -->
+        <section id="projects" class="py-20 px-4 md:px-8 max-w-7xl mx-auto">
+            <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+                <div>
+                    <span class="text-brand-teal font-mono text-xs uppercase tracking-widest block mb-2">// TECHNICAL PORTFOLIO</span>
+                    <h2 class="text-3xl sm:text-4xl font-extrabold text-white">Featured Engineering Projects</h2>
+                </div>
+
+                <!-- Filter Controls -->
+                <div class="flex flex-wrap gap-1.5 font-mono text-xs p-1.5 rounded-xl glass-panel border-slate-800">
+                    <button class="filter-btn active px-3.5 py-1.5 rounded-lg bg-brand-teal text-slate-950 font-bold transition-all" data-filter="all">ALL</button>
+                    <button class="filter-btn px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition-all" data-filter="embedded">EMBEDDED & SECURITY</button>
+                    <button class="filter-btn px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition-all" data-filter="quantum">QUANTUM & SIMULATION</button>
+                    <button class="filter-btn px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition-all" data-filter="software">SOFTWARE & ANALYTICS</button>
+                </div>
+            </div>
+
+            <!-- Project Cards Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8" id="projects-grid">
+
+                <!-- Project 1 -->
+                <div class="project-card glass-panel glass-panel-hover rounded-3xl p-6 sm:p-8 flex flex-col justify-between border-slate-800 group relative overflow-hidden" data-category="embedded">
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-start">
+                            <span class="text-xs font-mono px-3 py-1 rounded-full bg-brand-amber/10 text-brand-amber border border-brand-amber/30">FPGA / Hardware Security</span>
+                            <span class="font-mono text-xs text-slate-500">PROJ-01</span>
+                        </div>
+                        <h3 class="text-xl sm:text-2xl font-bold text-white group-hover:text-brand-cyan transition-colors">
+                            SRAM PUF Zero-Touch IoT Onboarding Platform
+                        </h3>
+                        <p class="text-slate-400 text-sm leading-relaxed">
+                            Hardware security & authentication system using uninitialized SRAM start-up state variations as silicon keys, implementing BCH error correction code via fuzzy extractors for cloud provisioning.
+                        </p>
+                        <div class="flex flex-wrap gap-2 pt-2">
+                            <span class="px-2.5 py-1 rounded-md bg-slate-900 text-slate-300 font-mono text-xs border border-slate-800">Verilog HDL</span>
+                            <span class="px-2.5 py-1 rounded-md bg-slate-900 text-slate-300 font-mono text-xs border border-slate-800">FPGA / MCU</span>
+                            <span class="px-2.5 py-1 rounded-md bg-slate-900 text-slate-300 font-mono text-xs border border-slate-800">Embedded C</span>
+                            <span class="px-2.5 py-1 rounded-md bg-slate-900 text-slate-300 font-mono text-xs border border-slate-800">Fuzzy Extractor</span>
+                        </div>
+                    </div>
+                    <div class="pt-6 mt-6 border-t border-slate-800/80 flex items-center justify-between">
+                        <button onclick="openProjectModal('p1')" class="text-xs font-mono text-brand-cyan hover:text-brand-teal flex items-center gap-1.5 transition-colors">
+                            DEEP DIVE SPECIFICATION <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Project 2 -->
+                <div class="project-card glass-panel glass-panel-hover rounded-3xl p-6 sm:p-8 flex flex-col justify-between border-slate-800 group relative overflow-hidden" data-category="quantum">
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-start">
+                            <span class="text-xs font-mono px-3 py-1 rounded-full bg-brand-blue/10 text-brand-blue border border-brand-blue/30">Physics / Quantum Simulation</span>
+                            <span class="font-mono text-xs text-slate-500">PROJ-02</span>
+                        </div>
+                        <h3 class="text-xl sm:text-2xl font-bold text-white group-hover:text-brand-cyan transition-colors">
+                            Quantum Gate Optical Analogy Framework
+                        </h3>
+                        <p class="text-slate-400 text-sm leading-relaxed">
+                            Experimental physics framework modeling Pauli-X (bit flip) and Hadamard (superposition) quantum logic gates via classical polarized wave plate optics, validated mathematically using Malus's Law in MATLAB.
+                        </p>
+                        <div class="flex flex-wrap gap-2 pt-2">
+                            <span class="px-2.5 py-1 rounded-md bg-slate-900 text-slate-300 font-mono text-xs border border-slate-800">MATLAB</span>
+                            <span class="px-2.5 py-1 rounded-md bg-slate-900 text-slate-300 font-mono text-xs border border-slate-800">Quantum Optics</span>
+                            <span class="px-2.5 py-1 rounded-md bg-slate-900 text-slate-300 font-mono text-xs border border-slate-800">Matrix Modeling</span>
+                        </div>
+                    </div>
+                    <div class="pt-6 mt-6 border-t border-slate-800/80 flex items-center justify-between">
+                        <button onclick="openProjectModal('p2')" class="text-xs font-mono text-brand-cyan hover:text-brand-teal flex items-center gap-1.5 transition-colors">
+                            DEEP DIVE SPECIFICATION <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Project 3 -->
+                <div class="project-card glass-panel glass-panel-hover rounded-3xl p-6 sm:p-8 flex flex-col justify-between border-slate-800 group relative overflow-hidden" data-category="embedded">
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-start">
+                            <span class="text-xs font-mono px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">Autonomous Robotics</span>
+                            <span class="font-mono text-xs text-slate-500">PROJ-03</span>
+                        </div>
+                        <h3 class="text-xl sm:text-2xl font-bold text-white group-hover:text-brand-cyan transition-colors">
+                            Autonomous Medical Delivery Mobile Robot
+                        </h3>
+                        <p class="text-slate-400 text-sm leading-relaxed">
+                            ESP32-based autonomous line-following medical robot using a 5-sensor IR array, L298N dual motor drivers, and real-time PID algorithm tuning for precise ward navigation.
+                        </p>
+                        <div class="flex flex-wrap gap-2 pt-2">
+                            <span class="px-2.5 py-1 rounded-md bg-slate-900 text-slate-300 font-mono text-xs border border-slate-800">ESP32 (C++)</span>
+                            <span class="px-2.5 py-1 rounded-md bg-slate-900 text-slate-300 font-mono text-xs border border-slate-800">PID Control</span>
+                            <span class="px-2.5 py-1 rounded-md bg-slate-900 text-slate-300 font-mono text-xs border border-slate-800">L298N H-Bridge</span>
+                            <span class="px-2.5 py-1 rounded-md bg-slate-900 text-slate-300 font-mono text-xs border border-slate-800">5-IR Array</span>
+                        </div>
+                    </div>
+                    <div class="pt-6 mt-6 border-t border-slate-800/80 flex items-center justify-between">
+                        <button onclick="openProjectModal('p3')" class="text-xs font-mono text-brand-cyan hover:text-brand-teal flex items-center gap-1.5 transition-colors">
+                            DEEP DIVE SPECIFICATION <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Project 4 -->
+                <div class="project-card glass-panel glass-panel-hover rounded-3xl p-6 sm:p-8 flex flex-col justify-between border-slate-800 group relative overflow-hidden" data-category="software">
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-start">
+                            <span class="text-xs font-mono px-3 py-1 rounded-full bg-brand-cyan/10 text-brand-cyan border border-brand-cyan/30">Python Analytics Tool</span>
+                            <span class="font-mono text-xs text-slate-500">PROJ-04</span>
+                        </div>
+                        <h3 class="text-xl sm:text-2xl font-bold text-white group-hover:text-brand-cyan transition-colors">
+                            Candidate Screening & Analytics Engine
+                        </h3>
+                        <p class="text-slate-400 text-sm leading-relaxed">
+                            Desktop software application written in Python (Tkinter) featuring keyword matching algorithms, candidate score metrics, automated Excel sheet parsing, and Matplotlib data visualization.
+                        </p>
+                        <div class="flex flex-wrap gap-2 pt-2">
+                            <span class="px-2.5 py-1 rounded-md bg-slate-900 text-slate-300 font-mono text-xs border border-slate-800">Python</span>
+                            <span class="px-2.5 py-1 rounded-md bg-slate-900 text-slate-300 font-mono text-xs border border-slate-800">Tkinter GUI</span>
+                            <span class="px-2.5 py-1 rounded-md bg-slate-900 text-slate-300 font-mono text-xs border border-slate-800">pandas</span>
+                            <span class="px-2.5 py-1 rounded-md bg-slate-900 text-slate-300 font-mono text-xs border border-slate-800">Matplotlib</span>
+                        </div>
+                    </div>
+                    <div class="pt-6 mt-6 border-t border-slate-800/80 flex items-center justify-between">
+                        <button onclick="openProjectModal('p4')" class="text-xs font-mono text-brand-cyan hover:text-brand-teal flex items-center gap-1.5 transition-colors">
+                            DEEP DIVE SPECIFICATION <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- 4. TECHNICAL SKILLS & COMPETENCY MATRIX -->
+        <section id="skills" class="py-20 px-4 md:px-8 max-w-7xl mx-auto">
+            <div class="text-center max-w-2xl mx-auto mb-12">
+                <span class="text-brand-teal font-mono text-xs uppercase tracking-widest block mb-2">// TECHNICAL PROFICIENCY</span>
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-white">Skills </h2>
+                <p class="text-slate-400 text-sm mt-2">Comprehensive overview of languages, hardware description, developer toolchains, and subject competencies.</p>
+            </div>
+
+            <!-- Skills Categorized Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                
+                <!-- Category 1 -->
+                <div class="glass-panel rounded-2xl p-6 border-slate-800 hover:border-brand-teal/40 transition-all">
+                    <div class="w-10 h-10 rounded-xl bg-brand-teal/10 border border-brand-teal/30 text-brand-cyan flex items-center justify-center mb-4">
+                        <i data-lucide="code-2" class="w-5 h-5"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-2">Languages & Core CS</h3>
+                    <p class="text-slate-400 text-xs mb-4">Fundamental computer science languages and algorithmic principles.</p>
+                    <ul class="space-y-2 font-mono text-xs text-slate-300">
+                        <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-brand-teal"></span> C / C++ (Data Structures & Systems)</li>
+                        <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-brand-teal"></span> Data Structures & Algorithms</li>
+                        <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-brand-teal"></span> Python (Analytics & Scripting)</li>
+                        <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-brand-teal"></span> Object-Oriented Methodology</li>
+                    </ul>
+                </div>
+
+                <!-- Category 2 -->
+                <div class="glass-panel rounded-2xl p-6 border-slate-800 hover:border-brand-amber/40 transition-all">
+                    <div class="w-10 h-10 rounded-xl bg-brand-amber/10 border border-brand-amber/30 text-brand-amber flex items-center justify-center mb-4">
+                        <i data-lucide="cpu" class="w-5 h-5"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-2">Embedded & Hardware</h3>
+                    <p class="text-slate-400 text-xs mb-4">Hardware design, microcontrollers, and logic synthesis.</p>
+                    <ul class="space-y-2 font-mono text-xs text-slate-300">
+                        <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-brand-amber"></span> SRAM PUF & Hardware Fingerprinting</li>
+                        <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-brand-amber"></span> Verilog HDL & FPGA Design</li>
+                        <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-brand-amber"></span> ESP32 & Microcontroller Firmware</li>
+                        <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-brand-amber"></span> Digital Logic & Circuit Design</li>
+                    </ul>
+                </div>
+
+                <!-- Category 3 -->
+                <div class="glass-panel rounded-2xl p-6 border-slate-800 hover:border-brand-blue/40 transition-all">
+                    <div class="w-10 h-10 rounded-xl bg-brand-blue/10 border border-brand-blue/30 text-brand-blue flex items-center justify-center mb-4">
+                        <i data-lucide="wrench" class="w-5 h-5"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-2">Tools & Environments</h3>
+                    <p class="text-slate-400 text-xs mb-4">Scientific tools, version control, and GUI frameworks.</p>
+                    <ul class="space-y-2 font-mono text-xs text-slate-300">
+                        <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-brand-blue"></span> MATLAB Physics Simulations</li>
+                        <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-brand-blue"></span> Python Tkinter, pandas, Matplotlib</li>
+                        <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-brand-blue"></span> Git, GitHub & Linux Terminal</li>
+                        <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-brand-blue"></span> VS Code, Vivado & PlatformIO</li>
+                    </ul>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- 5. ACADEMIC TIMELINE SECTION -->
+        <section id="education" class="py-20 px-4 md:px-8 max-w-7xl mx-auto">
+            <div class="glass-panel rounded-3xl p-8 sm:p-12 border-slate-800">
+                <span class="text-brand-teal font-mono text-xs uppercase tracking-widest block mb-2">// ACADEMIC TIMELINE</span>
+                <h2 class="text-3xl font-extrabold text-white mb-8">Education & Honors</h2>
+
+                <div class="relative border-l border-slate-800 ml-4 space-y-8">
+                    
+                    <!-- Timeline Item 1 -->
+                    <div class="relative pl-6 group">
+                        <span class="absolute -left-2.5 top-1.5 w-5 h-5 rounded-full bg-slate-900 border-2 border-brand-teal group-hover:bg-brand-teal transition-colors"></span>
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-2">
+                            <h3 class="text-lg font-bold text-white">B.E. in Computer Science & Engineering</h3>
+                            <span class="font-mono text-xs text-brand-cyan">2025 – 2029 </span>
+                        </div>
+                        <p class="text-slate-300 text-sm font-semibold mb-1">Rashtreeya Vidyalaya College of Engineering (RVCE), Bengaluru</p>
+                        <p class="text-slate-400 text-xs leading-relaxed max-w-2xl">
+                            Currently in 3rd Semester. Coursework encompasses Data Structures & Algorithms, Object-Oriented Programming in C++, Digital System Design, Microcontrollers, and Mathematical Logic.
+                        </p>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- 6. CONTACT SECTION -->
+        <section id="contact" class="py-20 px-4 md:px-8 max-w-7xl mx-auto">
+            <div class="glass-panel rounded-3xl p-8 sm:p-12 border-slate-800 relative overflow-hidden">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                    
+                    <div class="lg:col-span-6 space-y-4">
+                        <span class="text-brand-teal font-mono text-xs uppercase tracking-widest">// GET IN TOUCH</span>
+                        <h2 class="text-3xl sm:text-4xl font-extrabold text-white">Contact Rithvik</h2>
+                        <p class="text-slate-400 text-sm leading-relaxed">
+                            Interested in discussing embedded systems research, C++ algorithms, or hardware security projects? Feel free to drop a message or connect via GitHub and LinkedIn.
+                        </p>
+
+                        <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800/80 font-mono text-xs space-y-2 text-slate-300">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="map-pin" class="w-4 h-4 text-brand-teal"></i>
+                                <span>RV College of Engineering, Bengaluru, Karnataka, India</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="mail" class="w-4 h-4 text-brand-amber"></i>
+                                <span>rithvik.cse@rvce.edu.in</span>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-wrap items-center gap-4 pt-2 font-mono text-xs">
+                            <a href="https://github.com" target="_blank" rel="noopener noreferrer" class="px-4 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-200 hover:text-brand-cyan transition-all flex items-center gap-2">
+                                <i data-lucide="github" class="w-4 h-4"></i> GitHub Profile
+                            </a>
+                            <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" class="px-4 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-200 hover:text-brand-cyan transition-all flex items-center gap-2">
+                                <i data-lucide="linkedin" class="w-4 h-4"></i> LinkedIn Profile
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Executive Contact Form -->
+                    <div class="lg:col-span-6 bg-slate-950/80 p-6 sm:p-8 rounded-2xl border border-slate-800">
+                        <form id="contact-form" onsubmit="handleFormSubmit(event)" class="space-y-4">
+                            <div>
+                                <label class="block font-mono text-xs text-slate-400 mb-1">YOUR NAME</label>
+                                <input type="text" required placeholder="Alex Vance" class="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white focus:outline-none focus:border-brand-teal font-mono text-xs transition-colors">
+                            </div>
+
+                            <div>
+                                <label class="block font-mono text-xs text-slate-400 mb-1">EMAIL ADDRESS</label>
+                                <input type="email" required placeholder="alex@company.com" class="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white focus:outline-none focus:border-brand-teal font-mono text-xs transition-colors">
+                            </div>
+
+                            <div>
+                                <label class="block font-mono text-xs text-slate-400 mb-1">MESSAGE</label>
+                                <textarea rows="3" required placeholder="Hi Rithvik, I would like to discuss a project..." class="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white focus:outline-none focus:border-brand-teal font-mono text-xs transition-colors resize-none"></textarea>
+                            </div>
+
+                            <button type="submit" class="w-full py-3 rounded-xl bg-slate-100 hover:bg-brand-teal text-slate-950 font-bold text-xs tracking-wider uppercase transition-colors shadow-lg">
+                                Send Direct Message
+                            </button>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="pt-12 text-center font-mono text-xs text-slate-500">
+                <p>© 2026 Rithvik | RVCE Bengaluru • B.E. Computer Science & Engineering</p>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- PROJECT DETAIL MODAL -->
+    <div id="project-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md hidden opacity-0 transition-opacity duration-300">
+        <div class="glass-panel max-w-2xl w-full rounded-3xl p-6 sm:p-8 border-slate-700 relative space-y-6 max-h-[90vh] overflow-y-auto">
+            
+            <button onclick="closeProjectModal()" class="absolute top-6 right-6 p-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white transition-colors">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+
+            <div class="space-y-2">
+                <span id="modal-tag" class="text-xs font-mono px-3 py-1 rounded-full bg-brand-teal/10 text-brand-cyan border border-brand-teal/30">CATEGORY</span>
+                <h2 id="modal-title" class="text-2xl font-bold text-white">Project Title</h2>
+            </div>
+
+            <div class="space-y-4 text-slate-300 text-sm leading-relaxed" id="modal-content">
+                <!-- Injected content -->
+            </div>
+
+            <div class="pt-4 border-t border-slate-800 flex items-center justify-between">
+                <a href="https://github.com" target="_blank" class="text-xs font-mono text-brand-cyan hover:underline flex items-center gap-1.5">
+                    <i data-lucide="github" class="w-4 h-4"></i> View Repository
+                </a>
+                <button onclick="closeProjectModal()" class="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 font-mono text-xs text-white transition-colors">
+                    Close Specification
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 glass-panel border border-brand-teal/50 text-brand-cyan px-5 py-3 rounded-2xl font-mono text-xs shadow-2xl flex items-center gap-3 translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+        <i data-lucide="check-circle" class="w-4 h-4 text-brand-teal"></i>
+        <span id="toast-message">Notification Message</span>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // Lucide Icons
+        lucide.createIcons();
+
+        // ----------------------------------------------------
+        // AUDIO SYNTHESIZER (TONE.JS)
+        // ----------------------------------------------------
+        let soundEnabled = true;
+        let synth = null;
+
+        function initAudio() {
+            try {
+                synth = new Tone.Synth({
+                    oscillator: { type: "sine" },
+                    envelope: { attack: 0.005, decay: 0.08, sustain: 0, release: 0.08 }
+                }).toDestination();
+                synth.volume.value = -22;
+            } catch (e) {}
+        }
+
+        function playSound(note = "C5") {
+            if (!soundEnabled) return;
+            if (!synth) initAudio();
+            try {
+                if (Tone.context.state !== 'running') {
+                    Tone.start();
+                }
+                synth.triggerAttackRelease(note, "32n");
+            } catch (e) {}
+        }
+
+        document.getElementById('audio-toggle').addEventListener('click', () => {
+            soundEnabled = !soundEnabled;
+            const icon = document.getElementById('audio-icon');
+            const text = document.getElementById('audio-text');
+            if (soundEnabled) {
+                icon.setAttribute('data-lucide', 'volume-2');
+                text.innerText = 'SFX ON';
+                showToast('Audio SFX Enabled');
+            } else {
+                icon.setAttribute('data-lucide', 'volume-x');
+                text.innerText = 'SFX OFF';
+                showToast('Audio SFX Muted');
+            }
+            lucide.createIcons();
+            playSound("G5");
+        });
+
+        // ----------------------------------------------------
+        // THREE.JS GEOMETRIC CONSTELLATION BACKGROUND
+        // ----------------------------------------------------
+        let scene, camera, renderer, nodeMeshGroup;
+        let mouseX = 0, mouseY = 0;
+
+        function initThreeJS() {
+            const container = document.getElementById('canvas-container');
+
+            scene = new THREE.Scene();
+            scene.fog = new THREE.FogExp2(0x080a0f, 0.015);
+
+            camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 40;
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            container.appendChild(renderer.domElement);
+
+            // Floating Wireframe Node Network Group
+            nodeMeshGroup = new THREE.Group();
+            const nodeCount = 32;
+            const nodeGeometry = new THREE.IcosahedronGeometry(0.7, 1);
+            const nodeMaterial = new THREE.MeshBasicMaterial({
+                color: 0x06b6d4,
+                wireframe: true,
+                transparent: true,
+                opacity: 0.35
+            });
+
+            const positions = [];
+            for (let i = 0; i < nodeCount; i++) {
+                const node = new THREE.Mesh(nodeGeometry, nodeMaterial);
+                node.position.x = (Math.random() - 0.5) * 55;
+                node.position.y = (Math.random() - 0.5) * 55;
+                node.position.z = (Math.random() - 0.5) * 55;
+
+                nodeMeshGroup.add(node);
+                positions.push(node.position);
+            }
+
+            // Connection Lines
+            const lineMat = new THREE.LineBasicMaterial({
+                color: 0x1e293b,
+                transparent: true,
+                opacity: 0.6
+            });
+
+            const lineGeom = new THREE.BufferGeometry();
+            const linePositions = [];
+
+            for (let i = 0; i < nodeCount; i++) {
+                for (let j = i + 1; j < nodeCount; j++) {
+                    const dist = positions[i].distanceTo(positions[j]);
+                    if (dist < 16) {
+                        linePositions.push(positions[i].x, positions[i].y, positions[i].z);
+                        linePositions.push(positions[j].x, positions[j].y, positions[j].z);
+                    }
+                }
+            }
+
+            lineGeom.setAttribute('position', new THREE.Float32BufferAttribute(linePositions, 3));
+            const lines = new THREE.LineSegments(lineGeom, lineMat);
+            nodeMeshGroup.add(lines);
+
+            scene.add(nodeMeshGroup);
+
+            window.addEventListener('resize', onResize);
+            document.addEventListener('mousemove', onMouseMove);
+        }
+
+        function onResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function onMouseMove(e) {
+            mouseX = (e.clientX - window.innerWidth / 2) * 0.0003;
+            mouseY = (e.clientY - window.innerHeight / 2) * 0.0003;
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            if (nodeMeshGroup) {
+                nodeMeshGroup.rotation.y += 0.0006;
+                nodeMeshGroup.rotation.x += (mouseY - nodeMeshGroup.rotation.x) * 0.05;
+                nodeMeshGroup.rotation.y += (mouseX - nodeMeshGroup.rotation.y) * 0.05;
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        window.onload = function() {
+            initThreeJS();
+            animate();
+        };
+
+        // ----------------------------------------------------
+        // PROJECT SPECIFICATIONS DATA
+        // ----------------------------------------------------
+        const projectsData = {
+            p1: {
+                title: "SRAM PUF Zero-Touch IoT Onboarding Platform",
+                tag: "FPGA / Hardware Security",
+                content: `
+                    <p class="mb-3"><strong>Core Architecture:</strong> Hardware authentication system leveraging micro-scale manufacturing variances in static RAM cells at initial power-up. Generates cryptographic device fingerprints directly from silicon physics without requiring pre-flashed secret keys.</p>
+                    <p class="mb-3"><strong>Key Outcomes:</strong> Designed BCH error-correcting codes in Verilog HDL to counter temperature fluctuations and voltage noise. Enabled zero-touch secure cloud provisioning for edge devices.</p>
+                    <div class="p-3 bg-slate-900 rounded-xl font-mono text-xs border border-slate-800 text-brand-cyan">
+                        - Verilog HDL Logic Synthesis<br/>
+                        - Fuzzy Extractor Error Correction<br/>
+                        - Hardware SRAM Power-Up Fingerprinting<br/>
+                        - Microcontroller Embedded C Firmware
+                    </div>
+                `
+            },
+            p2: {
+                title: "Quantum Gate Optical Analogy Framework",
+                tag: "Quantum Optics / MATLAB",
+                content: `
+                    <p class="mb-3"><strong>Core Architecture:</strong> Physics and mathematical simulator modeling single-qubit quantum operators (Pauli-X bit-flips and Hadamard superposition) through classical polarized light setups.</p>
+                    <p class="mb-3"><strong>Key Outcomes:</strong> Formulated optical wave plate rotation angles to represent qubit unitary transformation matrices. Validated experimental light intensity profiles against Malus's Law calculations in MATLAB.</p>
+                    <div class="p-3 bg-slate-900 rounded-xl font-mono text-xs border border-slate-800 text-brand-blue">
+                        - MATLAB Wave Matrix Computations<br/>
+                        - Optical Polarization & Wave Plate Physics<br/>
+                        - Unitary Transformation Modeling
+                    </div>
+                `
+            },
+            p3: {
+                title: "Autonomous Medical Delivery Mobile Robot",
+                tag: "Robotics & Microcontrollers",
+                content: `
+                    <p class="mb-3"><strong>Core Architecture:</strong> Embedded mobile robot engineered for precise, line-guided payload delivery across hospital wards.</p>
+                    <p class="mb-3"><strong>Key Outcomes:</strong> Implemented real-time PID feedback control on ESP32 microcontrollers reading continuous telemetry from a 5-channel IR reflection array. Achieved high-speed track retention and smooth motor torque regulation via L298N H-bridges.</p>
+                    <div class="p-3 bg-slate-900 rounded-xl font-mono text-xs border border-slate-800 text-emerald-400">
+                        - ESP32 C++ Microcontroller Firmware<br/>
+                        - 5-Channel IR Sensor Array Integration<br/>
+                        - Closed-Loop PID Speed Control
+                    </div>
+                `
+            },
+            p4: {
+                title: "Candidate Screening & Analytics Engine",
+                tag: "Python Analytics App",
+                content: `
+                    <p class="mb-3"><strong>Core Architecture:</strong> Desktop utility application engineered in Python (Tkinter) for automated applicant resume parsing and keyword qualification.</p>
+                    <p class="mb-3"><strong>Key Outcomes:</strong> Integrated pandas data pipelines for structured Excel batch processing and candidate scoring. Rendered applicant metric distributions via Matplotlib chart displays.</p>
+                    <div class="p-3 bg-slate-900 rounded-xl font-mono text-xs border border-slate-800 text-brand-cyan">
+                        - Python Tkinter GUI Interface<br/>
+                        - pandas Data Parsing Pipeline<br/>
+                        - Matplotlib Graphical Visualizations
+                    </div>
+                `
+            }
+        };
+
+        function openProjectModal(id) {
+            playSound("E5");
+            const data = projectsData[id];
+            if (!data) return;
+
+            document.getElementById('modal-title').innerText = data.title;
+            document.getElementById('modal-tag').innerText = data.tag;
+            document.getElementById('modal-content').innerHTML = data.content;
+
+            const modal = document.getElementById('project-modal');
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.remove('opacity-0'), 10);
+        }
+
+        function closeProjectModal() {
+            playSound("C5");
+            const modal = document.getElementById('project-modal');
+            modal.classList.add('opacity-0');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        // Project Filter Logic
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        const projectCards = document.querySelectorAll('.project-card');
+
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                playSound("D5");
+                filterBtns.forEach(b => {
+                    b.classList.remove('bg-brand-teal', 'text-slate-950', 'font-bold');
+                    b.classList.add('text-slate-400');
+                });
+                btn.classList.add('bg-brand-teal', 'text-slate-950', 'font-bold');
+                btn.classList.remove('text-slate-400');
+
+                const filter = btn.getAttribute('data-filter');
+
+                projectCards.forEach(card => {
+                    if (filter === 'all' || card.getAttribute('data-category') === filter) {
+                        card.style.display = 'flex';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            });
+        });
+
+        // Contact Form Handler
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            playSound("G5");
+            showToast("Message Transmitted to Rithvik");
+            e.target.reset();
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-message').innerText = msg;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => toast.classList.add('translate-y-20', 'opacity-0'), 3000);
+        }
+
+        // Subtle Hover SFX
+        document.querySelectorAll('.glass-panel, button, a').forEach(item => {
+            item.addEventListener('mouseenter', () => playSound("A4"));
+        });
+    </script>
+</body>
+</html>
