@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Y Sreekar Reddy – Portfolio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+/* ---------- Theme ---------- */
+:root {
+  --bg: #e8edf6; --ink: #14213d; --mut: #55627d; --card: #f6f8fc;
+  --acc: #2f5bff; --amb: #ffb020; --line: #c9d2e3;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1626; --ink: #e8edf6; --mut: #9aa8c4; --card: #18233b;
+    --acc: #7c98ff; --amb: #ffc04d; --line: #2a3857;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1626; --ink: #e8edf6; --mut: #9aa8c4; --card: #18233b;
+  --acc: #7c98ff; --amb: #ffc04d; --line: #2a3857;
+}
+
+/* ---------- Base ---------- */
+* { box-sizing: border-box; }
+html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 400 17px/1.6 "Instrument Sans", system-ui, sans-serif; }
+h1, h2, h3 { font-family: "Bricolage Grotesque", system-ui, sans-serif; line-height: 1.05; margin: 0; }
+a { color: inherit; }
+.wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+
+/* ---------- Nav ---------- */
+nav { display: flex; justify-content: space-between; align-items: center; padding: 22px 0; }
+nav b { font-family: "Bricolage Grotesque"; font-size: 20px; }
+nav a { margin-left: 22px; text-decoration: none; color: var(--mut); font-weight: 500; }
+nav a:hover, nav a:focus-visible { color: var(--acc); }
+
+/* ---------- Hero ---------- */
+.hero { display: grid; grid-template-columns: 1.1fr 1fr; gap: 40px; align-items: center; min-height: 78vh; padding: 20px 0 60px; }
+.hero h1 { font-size: clamp(46px, 7.5vw, 92px); font-weight: 800; letter-spacing: -.03em; }
+.hero p { max-width: 46ch; color: var(--mut); font-size: 19px; margin: 22px 0 28px; }
+.btn { display: inline-block; padding: 13px 22px; border-radius: 12px; background: var(--ink); color: var(--bg); text-decoration: none; font-weight: 600; margin-right: 10px; }
+.btn.alt { background: transparent; color: var(--ink); border: 1.5px solid var(--ink); }
+.btn:focus-visible, a:focus-visible { outline: 3px solid var(--acc); outline-offset: 3px; }
+
+/* ---------- 3D stack ---------- */
+.stage { perspective: 1100px; height: 430px; display: grid; place-items: center; }
+.stack { position: relative; width: 300px; height: 300px; transform-style: preserve-3d; transform: rotateX(58deg) rotateZ(-32deg); transition: transform .15s ease-out; }
+.layer { position: absolute; inset: 0; border-radius: 22px; border: 1.5px solid var(--ink); padding: 18px; font: 600 15px "Bricolage Grotesque"; display: flex; align-items: flex-end; }
+.l1 { background: var(--card); transform: translateZ(0); }
+.l2 { background: color-mix(in srgb, var(--acc) 85%, transparent); color: #fff; transform: translateZ(70px); }
+.l3 { background: var(--amb); color: #14213d; transform: translateZ(140px); }
+.l4 { background: var(--ink); color: var(--bg); transform: translateZ(210px); inset: 60px; border-radius: 50%; align-items: center; justify-content: center; padding: 0; text-align: center; }
+.avatar { width: 84px; height: 84px; border-radius: 50%; object-fit: cover; border: 3px solid var(--card); position: absolute; left: -20px; top: -20px; transform: translateZ(250px) rotateZ(32deg) rotateX(-58deg); }
+
+/* ---------- Sections ---------- */
+section { padding: 70px 0; border-top: 1px solid var(--line); }
+section > h2 { font-size: clamp(32px, 4.5vw, 52px); margin-bottom: 32px; letter-spacing: -.02em; }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 22px; perspective: 1000px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 26px; transition: transform .2s ease-out, box-shadow .2s; transform-style: preserve-3d; will-change: transform; }
+.card:hover { box-shadow: 0 26px 40px -22px rgba(20,33,61,.45); }
+.card h3 { font-size: 25px; margin-bottom: 6px; }
+.card p { margin: 10px 0; color: var(--mut); }
+.tags { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 14px; }
+.tags span { font-size: 13.5px; font-weight: 500; padding: 3px 11px; border-radius: 99px; background: color-mix(in srgb, var(--acc) 14%, transparent); color: var(--acc); }
+
+.meta { color: var(--mut); font-size: 15px; }
+.job { display: grid; grid-template-columns: 170px 1fr; gap: 26px; padding: 22px 0; border-bottom: 1px solid var(--line); }
+.job:last-child { border: 0; }
+.job ul { margin: 8px 0 0; padding-left: 18px; color: var(--mut); }
+.job li { margin: 6px 0; }
+
+.skills { display: grid; grid-template-columns: 150px 1fr; gap: 12px 22px; }
+.skills dt { font-weight: 600; }
+.skills dd { margin: 0; color: var(--mut); }
+
+footer { padding: 50px 0 70px; border-top: 1px solid var(--line); color: var(--mut); }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 800px) {
+  .hero { grid-template-columns: 1fr; min-height: 0; }
+  .stage { height: 380px; }
+  .job { grid-template-columns: 1fr; gap: 4px; }
+  .skills { grid-template-columns: 1fr; gap: 2px; }
+  .skills dd { margin-bottom: 12px; }
+  nav a { margin-left: 14px; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+
+<body>
+<div class="wrap">
+  <nav>
+    <b>Y Sreekar Reddy</b>
+    <div><a href="#work">Projects</a><a href="#exp">Experience</a><a href="#skills">Skills</a></div>
+  </nav>
+
+  <header class="hero">
+    <div>
+      <h1>Building AI systems that hold up under pressure.</h1>
+      <p>I’m Sreekar, an Information Science student at R.V. College of Engineering, Bengaluru. I build multi-agent RAG pipelines, full-stack platforms and security research tools.</p>
+      <a class="btn" href="#work">See projects</a><a class="btn alt" href="#exp">Experience</a>
+    </div>
+    <div class="stage" id="stage" aria-label="Interactive 3D stack: ingest, route, answer">
+      <div class="stack" id="stack">
+        <div class="layer l1">Ingest · PDF + OCR</div>
+        <div class="layer l2">Route · Supervisor agent</div>
+        <div class="layer l3">Answer · Domain experts</div>
+        <div class="layer l4">RAG<br>pipeline</div>
+        <img class="avatar" id="avatar" alt="Avatar">
+      </div>
+    </div>
+  </header>
+
+  <section id="work"><h2>Projects</h2><div class="grid" id="projects"></div></section>
+  <section id="exp"><h2>Experience</h2><div id="experience"></div></section>
+  <section id="skills"><h2>Skills &amp; roles</h2><dl class="skills" id="skillList"></dl></section>
+
+  <footer id="footer"></footer>
+</div>
+
+<script>
+/* ================= DATA ================= */
+const PROFILE = {
+  name: "Y Sreekar Reddy",
+  location: "Bengaluru, India",
+  avatar: "avatar.jpg",          // put your photo next to this file
+  footerNote: "Add your email, GitHub and LinkedIn here."
+};
+
+const PROJECTS = [
+  { title: "HYPER-RAG",
+    text: "Stateful multi-agent RAG in LangGraph. A supervisor routes each query to domain experts. A hybrid ingestion pipeline vectorizes 100+ pages a month and keeps workflow latency near 10 seconds.",
+    tags: ["Next.js", "FastAPI", "LangGraph", "Gemini", "PostgreSQL", "ChromaDB", "Docker"] },
+  { title: "DTL Mental Health Chatbot",
+    text: "Multi-agent assistant pairing Gemini Flash with a post-trained DeepSeek model. It adds persistent memory, Pinecone RAG, Fitbit insights and crisis escalation. Instruction-tuned on about 1,800 steps; train loss fell 1.04 → 0.78 and validation loss 1.07 → 0.85.",
+    tags: ["TypeScript", "Supabase", "Ollama", "Mem0", "Pinecone", "Fitbit API"] },
+  { title: "ResearchRanker",
+    text: "NLP-based RAG pipeline over the CORE.ac.uk API for academic paper analysis: plagiarism detection, structural validation and ranking against top AI-selected papers.",
+    tags: ["Python", "Flask", "PyMuPDF", "NLTK", "BERT"] }
+];
+
+const EXPERIENCE = [
+  { when: "Oct 2024 – Present", title: "Research Intern, Anti-Sandbox Fingerprinting", where: "THWS Würzburg-Schweinfurt & RVCE",
+    points: ["Built a forensic artifact synthesis engine with temporal consistency validation, reaching high evasion against sandbox heuristics via EVTX injection, NTFS MFT spoofing and CPUID masking.",
+             "Engineered offline Windows Registry hive writers with realistic SMBIOS/WMI signatures and browser history injection, plus cross-file integrity validation."] },
+  { when: "Aug – Oct 2024", title: "Full Stack Developer", where: "FindInbox",
+    points: ["Engineered a multi-tenant EdTech platform with a fault-tolerant assessment engine and AI-driven, skill-based analytics.",
+             "Designed a normalized Supabase (PostgreSQL) data model for complex content taxonomy and low-latency analytics."] },
+  { when: "2024 – July 2028", title: "B.E. Information Science & Engineering",
+    where: "R.V. College of Engineering, Bengaluru · CGPA 9.64 (up to 3rd semester) · Class XII 98%, COMEDK rank 463", points: [] }
+];
+
+const SKILLS = [
+  ["Languages", "C, C++, Java, Python, Go, JavaScript, TypeScript, HTML, CSS"],
+  ["Development", "React, Express, Next, Node, Flask, LangGraph, LangChain, Pydantic"],
+  ["Databases", "MySQL, MongoDB, PostgreSQL, Supabase, Firebase, ChromaDB"],
+  ["Tools", "Git, Docker, AWS, Wireshark, Nmap, Burp Suite, GDB, Postman"],
+  ["Leadership", "Jr. Development Lead (Coding Club) · Horcrux Hunt CTF (Leading) · CloneFest and Hackemon CTF (Core Member) · Student Induction Programme 2025 (Advisor) · Blockquest 2025"]
+];
+
+/* ================= HELPERS ================= */
+function el(tag, className, html) {
+  const node = document.createElement(tag);
+  if (className) node.className = className;
+  if (html !== undefined) node.innerHTML = html;
+  return node;
+}
+function escapeHTML(s) {
+  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+function pointerOffset(event, element) {
+  const r = element.getBoundingClientRect();
+  return { x: (event.clientX - r.left) / r.width - 0.5, y: (event.clientY - r.top) / r.height - 0.5 };
+}
+function prefersReducedMotion() {
+  return matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
+/* ================= RENDER ================= */
+function renderProfile() {
+  document.getElementById("avatar").src = PROFILE.avatar;
+  document.getElementById("footer").textContent =
+    PROFILE.name + " · " + PROFILE.location + " · " + PROFILE.footerNote;
+}
+
+function renderProjects() {
+  const grid = document.getElementById("projects");
+  PROJECTS.forEach(p => {
+    const card = el("article", "card");
+    card.append(el("h3", "", escapeHTML(p.title)), el("p", "", escapeHTML(p.text)));
+    const tags = el("div", "tags");
+    p.tags.forEach(t => tags.append(el("span", "", escapeHTML(t))));
+    card.append(tags);
+    grid.append(card);
+  });
+}
+
+function renderExperience() {
+  const wrap = document.getElementById("experience");
+  EXPERIENCE.forEach(job => {
+    const row = el("div", "job");
+    const body = el("div");
+    body.append(el("h3", "", escapeHTML(job.title)), el("div", "meta", escapeHTML(job.where)));
+    if (job.points.length) {
+      const ul = el("ul");
+      job.points.forEach(pt => ul.append(el("li", "", escapeHTML(pt))));
+      body.append(ul);
+    }
+    row.append(el("div", "meta", escapeHTML(job.when)), body);
+    wrap.append(row);
+  });
+}
+
+function renderSkills() {
+  const list = document.getElementById("skillList");
+  SKILLS.forEach(([label, value]) => {
+    list.append(el("dt", "", escapeHTML(label)), el("dd", "", escapeHTML(value)));
+  });
+}
+
+/* ================= 3D INTERACTIONS ================= */
+function initStackTilt() {
+  const stage = document.getElementById("stage");
+  const stack = document.getElementById("stack");
+  stage.addEventListener("pointermove", e => {
+    const { x, y } = pointerOffset(e, stage);
+    stack.style.transform = `rotateX(${58 - y * 26}deg) rotateZ(${-32 + x * 40}deg)`;
+  });
+  stage.addEventListener("pointerleave", () => { stack.style.transform = ""; });
+}
+
+function initCardTilt() {
+  document.querySelectorAll(".card").forEach(card => {
+    card.addEventListener("pointermove", e => {
+      const { x, y } = pointerOffset(e, card);
+      card.style.transform = `rotateY(${x * 10}deg) rotateX(${-y * 10}deg) translateZ(8px)`;
+    });
+    card.addEventListener("pointerleave", () => { card.style.transform = ""; });
+  });
+}
+
+/* ================= INIT ================= */
+function init() {
+  renderProfile();
+  renderProjects();
+  renderExperience();
+  renderSkills();
+  if (!prefersReducedMotion()) {
+    initStackTilt();
+    initCardTilt();   // must run after renderProjects()
+  }
+}
+document.addEventListener("DOMContentLoaded", init);
+</script>
+</body>
+</html>
