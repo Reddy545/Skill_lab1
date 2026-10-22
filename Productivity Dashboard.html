@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevFocus - Developer & Student Productivity Dashboard</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f6ff',
+                            100: '#e0edff',
+                            400: '#60a5fa',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            900: '#1e3a8a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- Inter & Fira Code Fonts -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .font-mono {
+            font-family: 'Fira Code', monospace;
+        }
+
+        /* Dark Mode Theme Variables */
+        html.dark body {
+            background-color: #0b0f17;
+            color: #f1f5f9;
+        }
+
+        /* Light Mode Theme Variables */
+        html:not(.dark) body {
+            background-color: #f8fafc;
+            color: #0f172a;
+        }
+
+        /* Custom Scrollbars */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        html.dark ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 3px;
+        }
+        html:not(.dark) ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+
+        /* Drag & Drop Visual Styles */
+        .task-card.dragging {
+            opacity: 0.4;
+            transform: scale(0.97) rotate(1deg);
+        }
+
+        .kanban-column.drag-over {
+            background-color: rgba(59, 130, 246, 0.12) !important;
+            border-color: #3b82f6 !important;
+        }
+
+        /* Circular Progress Ring Animation */
+        .progress-ring__circle {
+            transition: stroke-dashoffset 0.35s ease-in-out;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+
+        /* Glassmorphism Accents */
+        html.dark .glass-panel {
+            background: rgba(19, 27, 46, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        html:not(.dark) .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Custom Focus Ring */
+        *:focus-visible {
+            outline: 2px solid #3b82f6;
+            outline-offset: 2px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-blue-600 selection:text-white">
+
+    <!-- Top Navigation Header -->
+    <header class="sticky top-0 z-30 glass-panel border-b border-slate-800/80">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+            <!-- App Logo & Branding -->
+            <div class="flex items-center gap-3">
+                <div class="p-2 bg-blue-600/20 text-blue-500 rounded-xl border border-blue-500/30">
+                    <i class="ph-bold ph-terminal-window text-2xl"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg leading-tight flex items-center gap-2">
+                        DevFocus <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-blue-500/10 text-blue-500 border border-blue-500/20">v2.0</span>
+                    </h1>
+                    <p class="text-xs opacity-70 hidden sm:block">Developer & Student Focus Dashboard</p>
+                </div>
+            </div>
+
+            <!-- Controls & Theme Toggle -->
+            <div class="flex items-center gap-3">
+                <!-- Auto-save Status Indicator -->
+                <div id="save-indicator" class="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-900/80 border border-slate-800 text-xs font-mono text-emerald-400 transition-all opacity-0">
+                    <i class="ph-bold ph-check-circle"></i>
+                    <span>Saved</span>
+                </div>
+
+                <!-- Theme Mode Switcher -->
+                <button id="theme-toggle" title="Toggle Light/Dark Theme" class="p-2 rounded-lg bg-slate-800/80 dark:bg-slate-800 text-slate-300 hover:text-white border border-slate-700/60 transition-colors">
+                    <i id="theme-icon" class="ph-bold ph-moon text-lg"></i>
+                </button>
+
+                <!-- Hotkeys Modal Toggle -->
+                <button id="shortcuts-btn" title="Keyboard Shortcuts" class="p-2 rounded-lg bg-slate-800/80 text-slate-300 hover:text-white border border-slate-700/60 transition-colors">
+                    <i class="ph-bold ph-keyboard text-lg"></i>
+                </button>
+
+                <!-- New Task Primary CTA -->
+                <button id="btn-open-task-modal" class="flex items-center gap-2 px-3.5 py-1.5 text-xs font-semibold rounded-lg bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-600/20 transition-all active:scale-95">
+                    <i class="ph-bold ph-plus"></i>
+                    <span class="hidden xs:inline">New Task</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace Dashboard -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
+
+        <!-- STATS & QUICK METRICS HEADER BAR -->
+        <section class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="glass-panel p-4 rounded-xl flex items-center gap-4">
+                <div class="p-3 bg-blue-500/10 text-blue-500 rounded-lg">
+                    <i class="ph-bold ph-kanban text-2xl"></i>
+                </div>
+                <div>
+                    <p class="text-xs opacity-70 font-medium">Total Tasks</p>
+                    <p id="stat-total-tasks" class="text-xl font-bold font-mono">0</p>
+                </div>
+            </div>
+
+            <div class="glass-panel p-4 rounded-xl flex items-center gap-4">
+                <div class="p-3 bg-emerald-500/10 text-emerald-500 rounded-lg">
+                    <i class="ph-bold ph-check-square-offset text-2xl"></i>
+                </div>
+                <div>
+                    <p class="text-xs opacity-70 font-medium">Completed Tasks</p>
+                    <p id="stat-completed-tasks" class="text-xl font-bold font-mono">0</p>
+                </div>
+            </div>
+
+            <div class="glass-panel p-4 rounded-xl flex items-center gap-4">
+                <div class="p-3 bg-amber-500/10 text-amber-500 rounded-lg">
+                    <i class="ph-bold ph-timer text-2xl"></i>
+                </div>
+                <div>
+                    <p class="text-xs opacity-70 font-medium">Pomodoro Sessions Completed</p>
+                    <p id="stat-completed-poms" class="text-xl font-bold font-mono">0</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- TWO-COLUMN WORKSPACE: POMODORO & KANBAN -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+            <!-- LEFT COLUMN: POMODORO TIMER MODULE (4 cols on lg) -->
+            <section class="lg:col-span-4 glass-panel rounded-2xl p-6 flex flex-col items-center gap-6 sticky top-20 border border-slate-800">
+                
+                <!-- Timer Header & Settings -->
+                <div class="w-full flex items-center justify-between border-b border-slate-800/80 pb-4">
+                    <div class="flex items-center gap-2">
+                        <i class="ph-bold ph-clock-afternoon text-blue-500"></i>
+                        <h2 class="font-bold text-sm tracking-wide uppercase opacity-80">Focus Timer</h2>
+                    </div>
+                    <button id="btn-timer-settings" class="text-slate-400 hover:text-blue-500 transition-colors p-1" title="Timer Settings">
+                        <i class="ph-bold ph-gear text-lg"></i>
+                    </button>
+                </div>
+
+                <!-- Session Mode Switcher Tabs (WORK & BREAK ONLY) -->
+                <div class="flex p-1 bg-slate-900/80 dark:bg-slate-900 rounded-xl border border-slate-800 w-full text-xs font-medium">
+                    <button id="mode-work" class="flex-1 py-1.5 rounded-lg bg-blue-600 text-white font-semibold transition-all">Work</button>
+                    <button id="mode-break" class="flex-1 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 transition-all">Break</button>
+                </div>
+
+                <!-- Circular Visual Countdown Display -->
+                <div class="relative flex items-center justify-center my-2">
+                    <svg class="w-56 h-56">
+                        <!-- Background Track -->
+                        <circle class="text-slate-800/80 dark:text-slate-800" stroke-width="8" stroke="currentColor" fill="transparent" r="92" cx="112" cy="112" />
+                        <!-- Animated Progress Ring -->
+                        <circle id="timer-progress-ring" class="progress-ring__circle text-blue-500" stroke-width="8" stroke-dasharray="578.05" stroke-dashoffset="0" stroke-linecap="round" stroke="currentColor" fill="transparent" r="92" cx="112" cy="112" />
+                    </svg>
+
+                    <!-- Time & Status Text Overlay -->
+                    <div class="absolute flex flex-col items-center text-center">
+                        <span id="timer-display" class="text-4xl font-bold font-mono tracking-tight">25:00</span>
+                        <span id="timer-status-label" class="text-xs font-semibold uppercase tracking-widest text-blue-500 mt-1">Focus Session</span>
+                    </div>
+                </div>
+
+                <!-- QUICK TIMER ADJUSTMENT CONTROLS -->
+                <div class="flex items-center justify-center gap-2 bg-slate-900/60 dark:bg-slate-950 p-2 rounded-xl border border-slate-800 text-xs w-full">
+                    <span class="text-slate-400 font-medium">Adjust Time:</span>
+                    <button id="btn-adjust-minus-5" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 font-mono font-bold">-5m</button>
+                    <button id="btn-adjust-minus-1" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 font-mono font-bold">-1m</button>
+                    <button id="btn-adjust-plus-1" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 font-mono font-bold">+1m</button>
+                    <button id="btn-adjust-plus-5" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 font-mono font-bold">+5m</button>
+                </div>
+
+                <!-- Selected Active Kanban Task Linker -->
+                <div class="w-full bg-slate-900/60 dark:bg-slate-950 p-3 rounded-xl border border-slate-800/80">
+                    <div class="flex items-center justify-between text-xs text-slate-400 mb-1">
+                        <span class="flex items-center gap-1"><i class="ph-bold ph-link text-blue-500"></i> Active Task:</span>
+                        <button id="btn-clear-linked-task" class="text-[10px] text-slate-500 hover:text-red-400 hidden">Clear</button>
+                    </div>
+                    <select id="active-task-select" class="w-full bg-slate-900 dark:bg-slate-900 text-slate-200 text-xs rounded-lg p-2 border border-slate-800 focus:border-blue-500 font-medium truncate">
+                        <option value="">-- No task linked --</option>
+                    </select>
+                </div>
+
+                <!-- Timer Controls -->
+                <div class="flex items-center justify-center gap-3 w-full">
+                    <button id="btn-timer-toggle" class="flex-1 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl shadow-lg shadow-blue-600/25 flex items-center justify-center gap-2 transition-all active:scale-95">
+                        <i id="timer-toggle-icon" class="ph-bold ph-play text-xl"></i>
+                        <span id="timer-toggle-text">Start Focus</span>
+                    </button>
+                    <button id="btn-timer-reset" title="Reset Session" class="p-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl border border-slate-700 transition-colors">
+                        <i class="ph-bold ph-arrows-counter-clockwise text-xl"></i>
+                    </button>
+                    <button id="btn-timer-skip" title="Switch Mode" class="p-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl border border-slate-700 transition-colors">
+                        <i class="ph-bold ph-skip-forward text-xl"></i>
+                    </button>
+                </div>
+            </section>
+
+            <!-- RIGHT COLUMN: KANBAN BOARD & FILTERS (8 cols on lg) -->
+            <section class="lg:col-span-8 flex flex-col gap-4">
+                
+                <!-- Filter Bar & Search Tools -->
+                <div class="glass-panel p-4 rounded-xl flex flex-wrap items-center justify-between gap-3 border border-slate-800">
+                    <!-- Search Input -->
+                    <div class="relative flex-1 min-w-[180px]">
+                        <i class="ph-bold ph-magnifying-glass absolute left-3 top-2.5 text-slate-500"></i>
+                        <input type="text" id="kanban-search" placeholder="Search tasks or tags..." class="w-full bg-slate-900 border border-slate-800 rounded-lg pl-9 pr-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:border-blue-500">
+                    </div>
+
+                    <div class="flex items-center gap-2 w-full sm:w-auto">
+                        <!-- Priority Filter -->
+                        <select id="filter-priority" class="bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-300 focus:border-blue-500">
+                            <option value="ALL">All Priorities</option>
+                            <option value="HIGH">High Priority</option>
+                            <option value="MEDIUM">Medium Priority</option>
+                            <option value="LOW">Low Priority</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Kanban Board Columns Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    
+                    <!-- COLUMN 1: TO DO -->
+                    <div class="kanban-column glass-panel rounded-2xl p-4 flex flex-col gap-3 min-h-[500px] border border-slate-800/80 transition-colors" data-column="TODO">
+                        <div class="flex items-center justify-between border-b border-slate-800/80 pb-2">
+                            <div class="flex items-center gap-2">
+                                <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+                                <h3 class="font-bold text-xs uppercase tracking-wider text-slate-300">To Do</h3>
+                            </div>
+                            <span id="count-todo" class="px-2 py-0.5 rounded-md text-[10px] font-mono font-semibold bg-slate-800 text-slate-400">0</span>
+                        </div>
+                        <div id="column-todo" class="task-list-container flex-1 flex flex-col gap-3">
+                            <!-- Cards inserted dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- COLUMN 2: IN PROGRESS -->
+                    <div class="kanban-column glass-panel rounded-2xl p-4 flex flex-col gap-3 min-h-[500px] border border-slate-800/80 transition-colors" data-column="IN_PROGRESS">
+                        <div class="flex items-center justify-between border-b border-slate-800/80 pb-2">
+                            <div class="flex items-center gap-2">
+                                <span class="w-2.5 h-2.5 rounded-full bg-blue-400"></span>
+                                <h3 class="font-bold text-xs uppercase tracking-wider text-slate-300">In Progress</h3>
+                            </div>
+                            <span id="count-in-progress" class="px-2 py-0.5 rounded-md text-[10px] font-mono font-semibold bg-slate-800 text-slate-400">0</span>
+                        </div>
+                        <div id="column-in-progress" class="task-list-container flex-1 flex flex-col gap-3">
+                            <!-- Cards inserted dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- COLUMN 3: COMPLETED -->
+                    <div class="kanban-column glass-panel rounded-2xl p-4 flex flex-col gap-3 min-h-[500px] border border-slate-800/80 transition-colors" data-column="COMPLETED">
+                        <div class="flex items-center justify-between border-b border-slate-800/80 pb-2">
+                            <div class="flex items-center gap-2">
+                                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+                                <h3 class="font-bold text-xs uppercase tracking-wider text-slate-300">Completed</h3>
+                            </div>
+                            <span id="count-completed" class="px-2 py-0.5 rounded-md text-[10px] font-mono font-semibold bg-slate-800 text-slate-400">0</span>
+                        </div>
+                        <div id="column-completed" class="task-list-container flex-1 flex flex-col gap-3">
+                            <!-- Cards inserted dynamically -->
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- MODAL: ADD / EDIT TASK -->
+    <div id="modal-task" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="glass-panel bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl relative">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
+                <h3 id="modal-task-title" class="font-bold text-base text-white">Create New Task</h3>
+                <button id="btn-close-task-modal" class="text-slate-400 hover:text-slate-200">
+                    <i class="ph-bold ph-x text-xl"></i>
+                </button>
+            </div>
+
+            <form id="form-task" class="space-y-4">
+                <input type="hidden" id="task-id">
+
+                <!-- Title Input -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Task Title *</label>
+                    <input type="text" id="task-title-input" required placeholder="e.g., Implement Graph Traversal Algorithm" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white placeholder-slate-500 focus:border-blue-500">
+                </div>
+
+                <!-- Description -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Description</label>
+                    <textarea id="task-desc-input" rows="3" placeholder="Additional task details or study notes..." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white placeholder-slate-500 focus:border-blue-500"></textarea>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <!-- Priority Select -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Priority</label>
+                        <select id="task-priority-input" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 focus:border-blue-500">
+                            <option value="LOW">Low</option>
+                            <option value="MEDIUM" selected>Medium</option>
+                            <option value="HIGH">High</option>
+                        </select>
+                    </div>
+
+                    <!-- Column Status -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Status Column</label>
+                        <select id="task-status-input" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 focus:border-blue-500">
+                            <option value="TODO">To Do</option>
+                            <option value="IN_PROGRESS">In Progress</option>
+                            <option value="COMPLETED">Completed</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Tag Selection -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Tags (Comma-separated)</label>
+                    <input type="text" id="task-tags-input" placeholder="Engineering, Algorithms, Exam Prep" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white placeholder-slate-500 focus:border-blue-500">
+                </div>
+
+                <!-- Actions -->
+                <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
+                    <button type="button" id="btn-cancel-task" class="px-4 py-2 text-xs font-semibold rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300">Cancel</button>
+                    <button type="submit" class="px-4 py-2 text-xs font-semibold rounded-xl bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-600/20">Save Task</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: TIMER SETTINGS -->
+    <div id="modal-timer-settings" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="glass-panel bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
+                <h3 class="font-bold text-base text-white">Timer Configurations</h3>
+                <button id="btn-close-timer-settings" class="text-slate-400 hover:text-slate-200">
+                    <i class="ph-bold ph-x text-xl"></i>
+                </button>
+            </div>
+
+            <form id="form-timer-settings" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Work Duration (minutes)</label>
+                    <input type="number" id="setting-work-min" min="1" max="180" value="25" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white font-mono">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Break Duration (minutes)</label>
+                    <input type="number" id="setting-break-min" min="1" max="60" value="5" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white font-mono">
+                </div>
+
+                <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
+                    <button type="submit" class="px-4 py-2 text-xs font-semibold rounded-xl bg-blue-600 hover:bg-blue-500 text-white">Save Durations</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: KEYBOARD SHORTCUTS -->
+    <div id="modal-shortcuts" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="glass-panel bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
+                <h3 class="font-bold text-base text-white">Keyboard Shortcuts</h3>
+                <button id="btn-close-shortcuts" class="text-slate-400 hover:text-slate-200">
+                    <i class="ph-bold ph-x text-xl"></i>
+                </button>
+            </div>
+
+            <div class="space-y-3 text-xs">
+                <div class="flex justify-between items-center bg-slate-950 p-2.5 rounded-lg border border-slate-800">
+                    <span class="text-slate-300">Play / Pause Timer</span>
+                    <kbd class="px-2 py-1 bg-slate-800 text-slate-300 rounded font-mono">Space</kbd>
+                </div>
+                <div class="flex justify-between items-center bg-slate-950 p-2.5 rounded-lg border border-slate-800">
+                    <span class="text-slate-300">Create New Task</span>
+                    <kbd class="px-2 py-1 bg-slate-800 text-slate-300 rounded font-mono">N</kbd>
+                </div>
+                <div class="flex justify-between items-center bg-slate-950 p-2.5 rounded-lg border border-slate-800">
+                    <span class="text-slate-300">Reset Timer</span>
+                    <kbd class="px-2 py-1 bg-slate-800 text-slate-300 rounded font-mono">R</kbd>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- APPLICATION LOGIC -->
+    <script>
+        const STORAGE_KEY = 'DEV_FOCUS_DASHBOARD_STATE_V2';
+
+        const DEFAULT_STATE = {
+            theme: 'dark',
+            tasks: [
+                {
+                    id: 'task-1',
+                    title: "Implement Graph Traversal in C++",
+                    description: "Write BFS and DFS methods with memory management unit tests.",
+                    column: "TODO",
+                    priority: "HIGH",
+                    tags: ["Algorithms", "C++"],
+                    createdAt: Date.now() - 3600000 * 5
+                },
+                {
+                    id: 'task-2',
+                    title: "Prepare for Operating Systems Midterm",
+                    description: "Review page replacement algorithms and virtual memory structures.",
+                    column: "IN_PROGRESS",
+                    priority: "HIGH",
+                    tags: ["Exam Prep", "Engineering"],
+                    createdAt: Date.now() - 3600000 * 2
+                },
+                {
+                    id: 'task-3',
+                    title: "Git Interactive Rebase Practice",
+                    description: "Practice squashing commits and solving merge conflicts locally.",
+                    column: "COMPLETED",
+                    priority: "LOW",
+                    tags: ["Git"],
+                    createdAt: Date.now() - 3600000 * 24
+                }
+            ],
+            timerSettings: {
+                workMin: 25,
+                breakMin: 5
+            },
+            timerState: {
+                mode: 'WORK', // 'WORK' or 'BREAK'
+                secondsLeft: 25 * 60,
+                isRunning: false,
+                activeTaskId: 'task-2'
+            },
+            totalCompletedPomsOverall: 3
+        };
+
+        let appState = JSON.parse(localStorage.getItem(STORAGE_KEY)) || DEFAULT_STATE;
+        let timerInterval = null;
+        let draggedTaskId = null;
+
+        // Web Notification API Request
+        if ("Notification" in window && Notification.permission !== "granted") {
+            Notification.requestPermission();
+        }
+
+        // Audio Notification via Web Audio API Synthesis
+        function playChimeSound() {
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContext) return;
+                const ctx = new AudioContext();
+                
+                const now = ctx.currentTime;
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(523.25, now); // C5
+                osc.frequency.exponentialRampToValueAtTime(659.25, now + 0.15); // E5
+                osc.frequency.exponentialRampToValueAtTime(783.99, now + 0.3); // G5
+
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
+
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                osc.start(now);
+                osc.stop(now + 0.8);
+            } catch (err) {
+                console.warn('Audio playback error:', err);
+            }
+        }
+
+        function triggerWebNotification(title, body) {
+            if ("Notification" in window && Notification.permission === "granted") {
+                new Notification(title, { body });
+            }
+        }
+
+        // Local Storage Persistence
+        function saveState() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+            showSaveIndicator();
+            updateStatsUI();
+        }
+
+        function showSaveIndicator() {
+            const el = document.getElementById('save-indicator');
+            if (!el) return;
+            el.classList.remove('hidden', 'opacity-0');
+            el.classList.add('opacity-100');
+            setTimeout(() => {
+                el.classList.remove('opacity-100');
+                el.classList.add('opacity-0');
+            }, 1500);
+        }
+
+        // Theme Toggle
+        function applyTheme(theme) {
+            appState.theme = theme;
+            const html = document.documentElement;
+            const icon = document.getElementById('theme-icon');
+
+            if (theme === 'dark') {
+                html.classList.add('dark');
+                icon.className = 'ph-bold ph-moon text-lg';
+            } else {
+                html.classList.remove('dark');
+                icon.className = 'ph-bold ph-sun text-lg';
+            }
+            saveState();
+        }
+
+        // Stats UI update
+        function updateStatsUI() {
+            const totalTasks = appState.tasks.length;
+            const completedTasks = appState.tasks.filter(t => t.column === 'COMPLETED').length;
+            const displayPoms = appState.totalCompletedPomsOverall || 0;
+
+            document.getElementById('stat-total-tasks').textContent = totalTasks;
+            document.getElementById('stat-completed-tasks').textContent = completedTasks;
+            document.getElementById('stat-completed-poms').textContent = displayPoms;
+        }
+
+        // Timer Core Logic
+        function getModeDurationSeconds(mode) {
+            const s = appState.timerSettings;
+            return mode === 'BREAK' ? s.breakMin * 60 : s.workMin * 60;
+        }
+
+        function setTimerMode(mode) {
+            appState.timerState.mode = mode;
+            appState.timerState.secondsLeft = getModeDurationSeconds(mode);
+            pauseTimer();
+
+            const btnWork = document.getElementById('mode-work');
+            const btnBreak = document.getElementById('mode-break');
+            const label = document.getElementById('timer-status-label');
+
+            if (mode === 'WORK') {
+                btnWork.className = 'flex-1 py-1.5 rounded-lg bg-blue-600 text-white font-semibold transition-all shadow-md';
+                btnBreak.className = 'flex-1 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 transition-all font-medium';
+                label.textContent = 'Focus Session';
+                label.className = 'text-xs font-semibold uppercase tracking-widest text-blue-500 mt-1';
+            } else {
+                btnBreak.className = 'flex-1 py-1.5 rounded-lg bg-emerald-600 text-white font-semibold transition-all shadow-md';
+                btnWork.className = 'flex-1 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 transition-all font-medium';
+                label.textContent = 'Break Session';
+                label.className = 'text-xs font-semibold uppercase tracking-widest text-emerald-500 mt-1';
+            }
+
+            renderTimerDisplay();
+            saveState();
+        }
+
+        function adjustTimerMinutes(minutes) {
+            const currentSec = appState.timerState.secondsLeft;
+            const newSec = Math.max(60, currentSec + (minutes * 60));
+            appState.timerState.secondsLeft = newSec;
+            renderTimerDisplay();
+            saveState();
+        }
+
+        function toggleTimer() {
+            if (appState.timerState.isRunning) {
+                pauseTimer();
+            } else {
+                startTimer();
+            }
+        }
+
+        function startTimer() {
+            if (appState.timerState.isRunning) return;
+            appState.timerState.isRunning = true;
+            
+            document.getElementById('timer-toggle-text').textContent = 'Pause';
+            document.getElementById('timer-toggle-icon').className = 'ph-bold ph-pause text-xl';
+
+            timerInterval = setInterval(() => {
+                if (appState.timerState.secondsLeft > 0) {
+                    appState.timerState.secondsLeft--;
+                    renderTimerDisplay();
+                } else {
+                    handleTimerCompletion();
+                }
+            }, 1000);
+        }
+
+        function pauseTimer() {
+            appState.timerState.isRunning = false;
+            if (timerInterval) clearInterval(timerInterval);
+            document.getElementById('timer-toggle-text').textContent = 'Start Focus';
+            document.getElementById('timer-toggle-icon').className = 'ph-bold ph-play text-xl';
+            saveState();
+        }
+
+        function resetTimer() {
+            pauseTimer();
+            appState.timerState.secondsLeft = getModeDurationSeconds(appState.timerState.mode);
+            renderTimerDisplay();
+        }
+
+        function handleTimerCompletion() {
+            pauseTimer();
+            playChimeSound();
+
+            if (appState.timerState.mode === 'WORK') {
+                appState.totalCompletedPomsOverall = (appState.totalCompletedPomsOverall || 0) + 1;
+                triggerWebNotification("Pomodoro Complete!", "Great job! Time to take a break.");
+                setTimerMode('BREAK');
+            } else {
+                triggerWebNotification("Break Finished!", "Ready to dive back into focus?");
+                setTimerMode('WORK');
+            }
+
+            renderKanbanBoard();
+            saveState();
+        }
+
+        function renderTimerDisplay() {
+            const m = Math.floor(appState.timerState.secondsLeft / 60);
+            const s = appState.timerState.secondsLeft % 60;
+            const timeStr = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+            
+            document.getElementById('timer-display').textContent = timeStr;
+            document.title = `(${timeStr}) DevFocus Productivity`;
+
+            // Circle ring progress
+            const circle = document.getElementById('timer-progress-ring');
+            const totalSec = getModeDurationSeconds(appState.timerState.mode);
+            const circumference = 2 * Math.PI * 92;
+            const offset = circumference - (appState.timerState.secondsLeft / Math.max(1, totalSec)) * circumference;
+            circle.style.strokeDashoffset = Math.max(0, offset);
+        }
+
+        // Kanban Board Rendering
+        function renderKanbanBoard() {
+            const todoCol = document.getElementById('column-todo');
+            const inProgressCol = document.getElementById('column-in-progress');
+            const completedCol = document.getElementById('column-completed');
+
+            todoCol.innerHTML = '';
+            inProgressCol.innerHTML = '';
+            completedCol.innerHTML = '';
+
+            const searchQuery = (document.getElementById('kanban-search').value || '').toLowerCase().trim();
+            const priorityFilter = document.getElementById('filter-priority').value;
+
+            const filteredTasks = appState.tasks.filter(t => {
+                const matchesSearch = t.title.toLowerCase().includes(searchQuery) || 
+                                      t.description.toLowerCase().includes(searchQuery) ||
+                                      t.tags.some(tg => tg.toLowerCase().includes(searchQuery));
+                const matchesPriority = (priorityFilter === 'ALL') || (t.priority === priorityFilter);
+
+                return matchesSearch && matchesPriority;
+            });
+
+            let counts = { TODO: 0, IN_PROGRESS: 0, COMPLETED: 0 };
+
+            filteredTasks.forEach(task => {
+                counts[task.column] = (counts[task.column] || 0) + 1;
+                const cardEl = createTaskCardElement(task);
+
+                if (task.column === 'TODO') todoCol.appendChild(cardEl);
+                else if (task.column === 'IN_PROGRESS') inProgressCol.appendChild(cardEl);
+                else if (task.column === 'COMPLETED') completedCol.appendChild(cardEl);
+            });
+
+            document.getElementById('count-todo').textContent = counts.TODO;
+            document.getElementById('count-in-progress').textContent = counts.IN_PROGRESS;
+            document.getElementById('count-completed').textContent = counts.COMPLETED;
+
+            populateTaskSelectOptions();
+            updateStatsUI();
+        }
+
+        function createTaskCardElement(task) {
+            const card = document.createElement('div');
+            card.className = `task-card bg-slate-900/90 dark:bg-slate-900 border border-slate-800 hover:border-slate-700 p-3.5 rounded-xl flex flex-col gap-2.5 cursor-grab active:cursor-grabbing shadow-md transition-all ${
+                appState.timerState.activeTaskId === task.id ? 'ring-2 ring-blue-500/80 bg-blue-950/20' : ''
+            }`;
+            card.setAttribute('draggable', 'true');
+            card.dataset.id = task.id;
+
+            let priorityBadge = '';
+            if (task.priority === 'HIGH') priorityBadge = '<span class="text-[10px] font-semibold font-mono px-2 py-0.5 rounded bg-red-500/10 text-red-400 border border-red-500/20">HIGH</span>';
+            else if (task.priority === 'MEDIUM') priorityBadge = '<span class="text-[10px] font-semibold font-mono px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">MED</span>';
+            else priorityBadge = '<span class="text-[10px] font-semibold font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">LOW</span>';
+
+            const tagsHtml = task.tags.map(tag => 
+                `<span class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700/60">${escapeHtml(tag)}</span>`
+            ).join('');
+
+            card.innerHTML = `
+                <div class="flex items-start justify-between gap-2">
+                    <h4 class="font-semibold text-xs text-slate-100 leading-snug line-clamp-2">${escapeHtml(task.title)}</h4>
+                    <div class="flex items-center gap-1 opacity-80 hover:opacity-100">
+                        <button class="btn-edit-task text-slate-400 hover:text-blue-400 p-0.5" title="Edit Task">
+                            <i class="ph-bold ph-pencil-simple text-sm"></i>
+                        </button>
+                        <button class="btn-delete-task text-slate-400 hover:text-red-400 p-0.5" title="Delete Task">
+                            <i class="ph-bold ph-trash text-sm"></i>
+                        </button>
+                    </div>
+                </div>
+
+                ${task.description ? `<p class="text-[11px] text-slate-400 line-clamp-2 leading-relaxed">${escapeHtml(task.description)}</p>` : ''}
+
+                <div class="flex flex-wrap items-center gap-1.5 pt-1">
+                    ${priorityBadge}
+                    ${tagsHtml}
+                </div>
+
+                <div class="flex items-center justify-end border-t border-slate-800/80 pt-2 text-[11px]">
+                    <button class="btn-link-timer text-[10px] font-medium flex items-center gap-1 ${appState.timerState.activeTaskId === task.id ? 'text-blue-400 font-bold' : 'text-slate-500 hover:text-slate-300'}">
+                        <i class="ph-bold ph-timer"></i>
+                        <span>${appState.timerState.activeTaskId === task.id ? 'Focus Active' : 'Start Pomodoro'}</span>
+                    </button>
+                </div>
+            `;
+
+            // Drag and Drop
+            card.addEventListener('dragstart', (e) => {
+                draggedTaskId = task.id;
+                card.classList.add('dragging');
+                e.dataTransfer.setData('text/plain', task.id);
+            });
+
+            card.addEventListener('dragend', () => {
+                card.classList.remove('dragging');
+                draggedTaskId = null;
+            });
+
+            card.querySelector('.btn-edit-task').addEventListener('click', (e) => {
+                e.stopPropagation();
+                openTaskModal(task.id);
+            });
+
+            card.querySelector('.btn-delete-task').addEventListener('click', (e) => {
+                e.stopPropagation();
+                deleteTask(task.id);
+            });
+
+            card.querySelector('.btn-link-timer').addEventListener('click', (e) => {
+                e.stopPropagation();
+                appState.timerState.activeTaskId = task.id;
+                setTimerMode('WORK');
+                renderKanbanBoard();
+                saveState();
+            });
+
+            return card;
+        }
+
+        function setupDragAndDropColumns() {
+            const columns = document.querySelectorAll('.kanban-column');
+
+            columns.forEach(col => {
+                col.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    col.classList.add('drag-over');
+                });
+
+                col.addEventListener('dragleave', () => {
+                    col.classList.remove('drag-over');
+                });
+
+                col.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    col.classList.remove('drag-over');
+                    const targetColumn = col.dataset.column;
+
+                    if (draggedTaskId) {
+                        const task = appState.tasks.find(t => t.id === draggedTaskId);
+                        if (task && task.column !== targetColumn) {
+                            task.column = targetColumn;
+                            renderKanbanBoard();
+                            saveState();
+                        }
+                    }
+                });
+            });
+        }
+
+        // Task Modals
+        function openTaskModal(taskId = null) {
+            const modal = document.getElementById('modal-task');
+            const titleEl = document.getElementById('modal-task-title');
+            const form = document.getElementById('form-task');
+
+            form.reset();
+
+            if (taskId) {
+                const task = appState.tasks.find(t => t.id === taskId);
+                if (!task) return;
+                titleEl.textContent = 'Edit Task';
+                document.getElementById('task-id').value = task.id;
+                document.getElementById('task-title-input').value = task.title;
+                document.getElementById('task-desc-input').value = task.description || '';
+                document.getElementById('task-priority-input').value = task.priority;
+                document.getElementById('task-tags-input').value = task.tags.join(', ');
+                document.getElementById('task-status-input').value = task.column;
+            } else {
+                titleEl.textContent = 'Create New Task';
+                document.getElementById('task-id').value = '';
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        function closeTaskModal() {
+            document.getElementById('modal-task').classList.add('hidden');
+        }
+
+        function handleTaskFormSubmit(e) {
+            e.preventDefault();
+            const taskId = document.getElementById('task-id').value;
+            const title = document.getElementById('task-title-input').value.trim();
+            const desc = document.getElementById('task-desc-input').value.trim();
+            const priority = document.getElementById('task-priority-input').value;
+            const tagsRaw = document.getElementById('task-tags-input').value;
+            const status = document.getElementById('task-status-input').value;
+
+            const tags = tagsRaw.split(',')
+                               .map(t => t.trim())
+                               .filter(t => t.length > 0);
+
+            if (taskId) {
+                const task = appState.tasks.find(t => t.id === taskId);
+                if (task) {
+                    task.title = title;
+                    task.description = desc;
+                    task.priority = priority;
+                    task.tags = tags;
+                    task.column = status;
+                }
+            } else {
+                const newTask = {
+                    id: 'task-' + Date.now(),
+                    title,
+                    description: desc,
+                    column: status,
+                    priority,
+                    tags: tags.length ? tags : ['General'],
+                    createdAt: Date.now()
+                };
+                appState.tasks.unshift(newTask);
+            }
+
+            closeTaskModal();
+            renderKanbanBoard();
+            saveState();
+        }
+
+        function deleteTask(id) {
+            appState.tasks = appState.tasks.filter(t => t.id !== id);
+            if (appState.timerState.activeTaskId === id) {
+                appState.timerState.activeTaskId = null;
+            }
+            renderKanbanBoard();
+            saveState();
+        }
+
+        function populateTaskSelectOptions() {
+            const select = document.getElementById('active-task-select');
+            const clearBtn = document.getElementById('btn-clear-linked-task');
+
+            select.innerHTML = '<option value="">-- No task linked --</option>';
+
+            appState.tasks.forEach(t => {
+                const opt = document.createElement('option');
+                opt.value = t.id;
+                opt.textContent = `[${t.column}] ${t.title}`;
+                if (t.id === appState.timerState.activeTaskId) opt.selected = true;
+                select.appendChild(opt);
+            });
+
+            if (appState.timerState.activeTaskId) {
+                clearBtn.classList.remove('hidden');
+            } else {
+                clearBtn.classList.add('hidden');
+            }
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/&/g, "&amp;")
+                      .replace(/</g, "&lt;")
+                      .replace(/>/g, "&gt;")
+                      .replace(/"/g, "&quot;")
+                      .replace(/'/g, "&#039;");
+        }
+
+        // App Initialization
+        function initApp() {
+            applyTheme(appState.theme || 'dark');
+
+            document.getElementById('theme-toggle').addEventListener('click', () => {
+                applyTheme(appState.theme === 'dark' ? 'light' : 'dark');
+            });
+
+            // Mode Switches
+            document.getElementById('mode-work').addEventListener('click', () => setTimerMode('WORK'));
+            document.getElementById('mode-break').addEventListener('click', () => setTimerMode('BREAK'));
+
+            // Quick Timer Controls
+            document.getElementById('btn-adjust-minus-5').addEventListener('click', () => adjustTimerMinutes(-5));
+            document.getElementById('btn-adjust-minus-1').addEventListener('click', () => adjustTimerMinutes(-1));
+            document.getElementById('btn-adjust-plus-1').addEventListener('click', () => adjustTimerMinutes(1));
+            document.getElementById('btn-adjust-plus-5').addEventListener('click', () => adjustTimerMinutes(5));
+
+            // Timer Controls
+            document.getElementById('btn-timer-toggle').addEventListener('click', toggleTimer);
+            document.getElementById('btn-timer-reset').addEventListener('click', resetTimer);
+            document.getElementById('btn-timer-skip').addEventListener('click', () => {
+                setTimerMode(appState.timerState.mode === 'WORK' ? 'BREAK' : 'WORK');
+            });
+
+            // Task Selector
+            document.getElementById('active-task-select').addEventListener('change', (e) => {
+                appState.timerState.activeTaskId = e.target.value || null;
+                renderKanbanBoard();
+                saveState();
+            });
+
+            document.getElementById('btn-clear-linked-task').addEventListener('click', () => {
+                appState.timerState.activeTaskId = null;
+                renderKanbanBoard();
+                saveState();
+            });
+
+            // Filters
+            document.getElementById('kanban-search').addEventListener('input', renderKanbanBoard);
+            document.getElementById('filter-priority').addEventListener('change', renderKanbanBoard);
+
+            // Modals
+            document.getElementById('btn-open-task-modal').addEventListener('click', () => openTaskModal());
+            document.getElementById('btn-close-task-modal').addEventListener('click', closeTaskModal);
+            document.getElementById('btn-cancel-task').addEventListener('click', closeTaskModal);
+            document.getElementById('form-task').addEventListener('submit', handleTaskFormSubmit);
+
+            // Timer Settings Modal
+            document.getElementById('btn-timer-settings').addEventListener('click', () => {
+                document.getElementById('setting-work-min').value = appState.timerSettings.workMin;
+                document.getElementById('setting-break-min').value = appState.timerSettings.breakMin;
+                document.getElementById('modal-timer-settings').classList.remove('hidden');
+            });
+
+            document.getElementById('btn-close-timer-settings').addEventListener('click', () => {
+                document.getElementById('modal-timer-settings').classList.add('hidden');
+            });
+
+            document.getElementById('form-timer-settings').addEventListener('submit', (e) => {
+                e.preventDefault();
+                appState.timerSettings.workMin = parseInt(document.getElementById('setting-work-min').value) || 25;
+                appState.timerSettings.breakMin = parseInt(document.getElementById('setting-break-min').value) || 5;
+                
+                document.getElementById('modal-timer-settings').classList.add('hidden');
+                setTimerMode(appState.timerState.mode);
+            });
+
+            // Hotkeys
+            document.getElementById('shortcuts-btn').addEventListener('click', () => {
+                document.getElementById('modal-shortcuts').classList.remove('hidden');
+            });
+            document.getElementById('btn-close-shortcuts').addEventListener('click', () => {
+                document.getElementById('modal-shortcuts').classList.add('hidden');
+            });
+
+            window.addEventListener('keydown', (e) => {
+                if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) return;
+
+                if (e.code === 'Space') {
+                    e.preventDefault();
+                    toggleTimer();
+                } else if (e.code === 'KeyN') {
+                    e.preventDefault();
+                    openTaskModal();
+                } else if (e.code === 'KeyR') {
+                    e.preventDefault();
+                    resetTimer();
+                }
+            });
+
+            setupDragAndDropColumns();
+            setTimerMode(appState.timerState.mode || 'WORK');
+            renderKanbanBoard();
+        }
+
+        window.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
