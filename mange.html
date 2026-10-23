@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Task Manager</title>
+    <link rel="stylesheet" href="proj.css">
+</head>
+<body>
+    <div class="container">
+        <header class="top">
+            <div>
+                <h1>📚 Student Task Manager</h1>
+                <p class="greeting-line">
+                    <span id="greeting"></span>
+                    <button id="nameBtn" class="link-btn">change name</button>
+                </p>
+                <small id="dateText" class="date-text"></small>
+            </div>
+            <button id="themeBtn" class="icon-btn" title="Toggle dark mode">🌙</button>
+        </header>
+
+        <p id="message" class="message"></p>
+
+        <section class="stats">
+            <div class="stat"><span id="totalCount">0</span><small>Total</small></div>
+            <div class="stat pending-stat"><span id="pendingCount">0</span><small>Pending</small></div>
+            <div class="stat done-stat"><span id="doneCount">0</span><small>Completed</small></div>
+            <div class="stat overdue-stat"><span id="overdueCount">0</span><small>Overdue</small></div>
+        </section>
+
+        <div class="progress">
+            <div id="progressBar" class="progress-bar"></div>
+        </div>
+        <p id="progressText" class="progress-text">0% completed</p>
+
+        <div class="row">
+            <input id="taskInput" type="text" placeholder="Enter a task" maxlength="100">
+            <button id="addBtn" class="btn primary">Add Task</button>
+        </div>
+        <div class="row options-row">
+            <select id="priorityInput">
+                <option value="high">🔴 High</option>
+                <option value="medium" selected>🟡 Medium</option>
+                <option value="low">🟢 Low</option>
+            </select>
+            <select id="categoryInput">
+                <option value="General">General</option>
+                <option value="Study">Study</option>
+                <option value="Assignment">Assignment</option>
+                <option value="Exam">Exam</option>
+                <option value="Project">Project</option>
+            </select>
+            <input id="dueInput" type="date">
+        </div>
+        <span id="error" class="error"></span>
+
+        <div class="row">
+            <input id="searchInput" type="text" placeholder="Search tasks (press /)">
+            <button class="btn filter-btn active" data-filter="all">All</button>
+            <button class="btn filter-btn" data-filter="pending">Pending</button>
+            <button class="btn filter-btn" data-filter="completed">Completed</button>
+        </div>
+        <div class="row options-row">
+            <select id="categoryFilter">
+                <option value="all">All categories</option>
+                <option value="General">General</option>
+                <option value="Study">Study</option>
+                <option value="Assignment">Assignment</option>
+                <option value="Exam">Exam</option>
+                <option value="Project">Project</option>
+            </select>
+            <select id="sortSelect">
+                <option value="newest">Sort: Newest</option>
+                <option value="oldest">Sort: Oldest</option>
+                <option value="priority">Sort: Priority</option>
+                <option value="due">Sort: Due date</option>
+            </select>
+        </div>
+
+        <ul id="taskList"></ul>
+        <p id="emptyText" class="empty"></p>
+
+        <div class="footer">
+            <small class="hint">Double-click a task to edit it</small>
+            <button id="clearBtn" class="btn danger">Clear Completed</button>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script src="proj.js"></script>
+</body>
+</html>
